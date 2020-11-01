@@ -22,6 +22,8 @@ const (
 )
 
 func main() {
+	must(loadJVS())
+
 	token, ok := os.LookupEnv("SAMCU_TOKEN")
 	if !ok {
 		panic(fmt.Sprintf("Need token in env var SAMCU_TOKEN"))
@@ -45,6 +47,16 @@ var handlers = map[string]func(func(string), string, []string){
 	"jvozba":   jvozba,
 	"rafsi":    rafsi,
 	"selrafsi": rafsi,
+	"valsi":    lookup,
+	"sisku":    reverseLookup,
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	} else {
+		return b
+	}
 }
 
 func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -58,9 +70,11 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	var respond = func(msg string) {
 		fmt.Println("→", msg)
-		_, err := s.ChannelMessageSend(m.Message.ChannelID, msg)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%v", err)
+		for i := 0; i < len(msg); i += 1918 {
+			_, err := s.ChannelMessageSend(m.Message.ChannelID, msg[i:min(i+1918, len(msg))])
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "%v", err)
+			}
 		}
 	}
 	var errmsg = func() {
