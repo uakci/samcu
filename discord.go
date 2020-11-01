@@ -50,6 +50,7 @@ var handlers = map[string]func(func(string), string, []string){
 	"valsi":    lookup,
 	"sisku":    reverseLookup,
 	"katna":    katna,
+	"gloss":    gloss,
 }
 
 func min(a, b int) int {

@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	jz "github.com/uakci/jvozba/v2"
+	jz "github.com/uakci/jvozba/v3"
 	"os"
 	"strings"
 )
