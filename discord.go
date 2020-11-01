@@ -28,7 +28,7 @@ func main() {
 	}
 	discord, err := discordgo.New("Bot " + token)
 	must(err)
-	discord.ShouldReconnectOnError = false
+	discord.ShouldReconnectOnError = true
 
 	must(discord.Open())
 	must(discord.UpdateListeningStatus("tinju’i toi"))
