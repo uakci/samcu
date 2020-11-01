@@ -44,7 +44,7 @@ func main() {
 }
 
 var handlers = map[string]func(func(string), string, []string){
-	"jvozba":   jvozba,
+	"lujvo":    jvozba,
 	"rafsi":    rafsi,
 	"selrafsi": rafsi,
 	"valsi":    lookup,
