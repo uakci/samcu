@@ -1,0 +1,13 @@
+github.com/bwmarrin/discordgo v0.22.0 h1:uBxY1HmlVCsW1IuaPjpCGT6A2DBwRn0nvOguQIxDdFM=
+github.com/bwmarrin/discordgo v0.22.0/go.mod h1:c1WtWUGN6nREDmzIpyTp/iD3VYt4Fpx+bVyfBG7JE+M=
+github.com/gorilla/websocket v1.4.0 h1:WDFjx/TMzVgy9VdMMQi2K2Emtwi2QcUQsztZ/zLaH/Q=
+github.com/gorilla/websocket v1.4.0/go.mod h1:E7qHFY5m1UJ88s3WnNqhKjPHQ0heANvMoAMk2YaljkQ=
+github.com/uakci/jvozba v2.0.2+incompatible h1:D3I6jIaiOefzdrqC+B5E41X8h1cEH9b7uJ8NsYJrVlo=
+github.com/uakci/jvozba v2.0.4-0.20201101030108-61ff766ee63a+incompatible h1:Oh1fti1gIhTfjPkcwK+4kRh9aoorPqLN40gc6VIEdUg=
+github.com/uakci/jvozba v2.0.4-0.20201101030108-61ff766ee63a+incompatible/go.mod h1:oKe4175qvnfERfoUF1WBsxFyNQVIwSIEMK2fiMq3rbg=
+github.com/uakci/jvozba/v2 v2.0.2 h1:SI6AAL/YTFY7Grz/js3yb8z0NUcBKY1Xb9UymT/+BMQ=
+github.com/uakci/jvozba/v2 v2.0.2/go.mod h1:hSI6d2Y4ePCuHcRcMkM55g9SDlne/fGqZgl4Fjyfzdc=
+github.com/uakci/jvozba/v2 v2.0.3 h1:JG5EzU2+mNqdNgE9Ve9N8qSoly2eabHaDl+d6fVUv8k=
+github.com/uakci/jvozba/v2 v2.0.3/go.mod h1:lZu3SKgB2EjsyGOJjswmX9c+XU5DFuCLQDD7O/8eFsA=
+golang.org/x/crypto v0.0.0-20181030102418-4d3f4d9ffa16 h1:y6ce7gCWtnH+m3dCjzQ1PCuwl28DDIc3VNnvY29DlIA=
+golang.org/x/crypto v0.0.0-20181030102418-4d3f4d9ffa16/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
