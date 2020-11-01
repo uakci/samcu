@@ -4,9 +4,10 @@ import (
 	"fmt"
 	jz "github.com/uakci/jvozba/v2"
 	"os"
+	"strings"
 )
 
-func jvozba(respond func(string), tanru string) {
+func jvozba(respond func(string), _ string, tanru []string) {
 	defer func() {
 		if r := recover(); r != nil {
 			respond("**spaji nabmi** .u’u")
@@ -14,7 +15,7 @@ func jvozba(respond func(string), tanru string) {
 		}
 	}()
 
-	lujvo, err := jz.Jvozba(tanru, jz.Brivla)
+	lujvo, err := jz.Jvozba(strings.Join(tanru, " "), jz.Brivla)
 	if err != nil {
 		respond("**nabmi**: " + err.Error())
 	} else {

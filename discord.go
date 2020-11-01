@@ -41,6 +41,12 @@ func main() {
 	discord.Close()
 }
 
+var handlers = map[string]func(func(string), string, []string){
+	"jvozba":   jvozba,
+	"rafsi":    rafsi,
+	"selrafsi": rafsi,
+}
+
 func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if s.State.User.ID == m.Author.ID {
 		return
@@ -51,8 +57,8 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	var respond = func(msg string) {
-    fmt.Println("→", msg)
-    _, err := s.ChannelMessageSend(m.Message.ChannelID, msg)
+		fmt.Println("→", msg)
+		_, err := s.ChannelMessageSend(m.Message.ChannelID, msg)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%v", err)
 		}
@@ -66,15 +72,15 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 		errmsg()
 		return
 	}
-  cmd := strings.TrimSuffix(fields[0], ":")
-  fields = fields[1:]
+	cmd := strings.TrimSuffix(fields[0], ":")
+	fields = fields[1:]
 
-  fmt.Println(cmd, fields)
+	fmt.Println(cmd, fields)
 
-	switch cmd {
-	case "lujvo":
-		jvozba(respond, strings.Join(fields, " "))
-	default:
+	handler, ok := handlers[cmd]
+	if !ok {
 		errmsg()
+		return
 	}
+	handler(respond, cmd, fields)
 }
