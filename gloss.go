@@ -24,7 +24,7 @@ func gloss(respond func(string), _ string, args []string) {
       }
       def, ok := dict[lang][s]
       if !ok || len(def.Glosses) == 0 {
-        result.WriteString("???")
+        result.WriteString("*" + s + "*")
       } else {
         result.WriteString(def.Glosses[0])
       }
