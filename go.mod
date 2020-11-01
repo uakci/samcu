@@ -4,5 +4,5 @@ go 1.15
 
 require (
 	github.com/bwmarrin/discordgo v0.22.0
-	github.com/uakci/jvozba/v2 v2.0.4-0.20201101182926-05d815ace5cd
+	github.com/uakci/jvozba/v2 v2.0.4-0.20201101185508-c0c9be37d7d8
 )

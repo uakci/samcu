@@ -42,8 +42,8 @@ func katna(respond func(string), _ string, args []string) {
 	for i, raf := range rafpoi {
 		ok := false
 		for selrafsi, rafsiporsi := range jz.Rafsi {
-      if selrafsi == string(raf) && len(raf) == 5 {
-				tanru[i] = string(raf)
+      if (len(raf) == 4 || len(raf) == 5) && len(selrafsi) == 5 && selrafsi[:4] == string(raf[:4]) {
+				tanru[i] = selrafsi
         ok = true
       } else {
         for _, rafsi := range rafsiporsi {
@@ -59,7 +59,7 @@ func katna(respond func(string), _ string, args []string) {
 			}
 		}
 		if !ok {
-			if len(raf) > 5 || (len(raf) == 5 && (bytes.Contains([]byte("aeiou"), []byte{raf[0]}) || bytes.Contains([]byte("aeiou"), []byte{raf[3]}))) {
+			if len(raf) > 5 || (len(raf) == 5 && (bytes.Contains([]byte("aeiou"), []byte{raf[0]}) || bytes.Contains([]byte("aeiou"), []byte{raf[3]}))) || (len(raf) == 4 && bytes.Contains([]byte("aeiou"), []byte{raf[0]}) && !bytes.Contains([]byte("aeiou"), []byte{raf[1]}) && !bytes.Contains([]byte("aeiou"), []byte{raf[2]}) && bytes.Contains([]byte("aeiou"), []byte{raf[3]})) {
 				tanru[i] = string(raf)
 			} else {
 				respond("unknown rafsi -" + string(raf) + "-")
