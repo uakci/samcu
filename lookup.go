@@ -60,7 +60,7 @@ func reverseLookup(respond func(string), _ string, args []string) {
 	}
 	matches := map[string]string{}
 	for head, vla := range dict[lang] {
-    add, ok := tryFind(vla.Definition, a)
+		add, ok := tryFind(vla.Definition, a)
 		if !ok {
 			add, ok = tryFind(vla.Notes, a)
 		}
@@ -94,7 +94,7 @@ func reverseLookup(respond func(string), _ string, args []string) {
 			buil.WriteString(match)
 			i++
 		}
-    respond(buil.String())
+		respond(buil.String())
 	case len(matches) <= highLimit:
 		buil := strings.Builder{}
 		i := 0

@@ -19,6 +19,6 @@ func jvozba(respond func(string), _ string, tanru []string) {
 	if err != nil {
 		respond("**nabmi**: " + err.Error())
 	} else {
-		respond(fmt.Sprintf("%s (%d)", lujvo, jz.Score(lujvo)))
+		respond(fmt.Sprintf("%s (%d)", lujvo, jz.Score([]byte(lujvo))))
 	}
 }
