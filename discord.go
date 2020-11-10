@@ -23,18 +23,23 @@ const (
 )
 
 func updateStatus(discord *discordgo.Session, quit <-chan struct{}) {
+	updaterStatuser(discord)
 	ticker := time.NewTicker(time.Hour)
 	for {
 		select {
 		case <-ticker.C:
-			e := discord.UpdateListeningStatus("tinju’i toi")
-			if e != nil {
-				fmt.Fprintf(os.Stderr, "%v", e)
-			}
+			updaterStatuser(discord)
 		case <-quit:
 			ticker.Stop()
 			return
 		}
+	}
+}
+
+func updaterStatuser(discord *discordgo.Session) {
+	e := discord.UpdateListeningStatus("tinju’i toi")
+	if e != nil {
+		fmt.Fprintf(os.Stderr, "%v", e)
 	}
 }
 
@@ -52,7 +57,7 @@ func main() {
 	must(discord.Open())
 	discord.AddHandler(handleMessage)
 	quitter := make(chan struct{}, 1)
-	updateStatus(discord, quitter)
+	go updateStatus(discord, quitter)
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
