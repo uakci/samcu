@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -21,6 +22,22 @@ const (
 	helpChannel = "772167961771245578"
 )
 
+func updateStatus(discord *discordgo.Session, quit <-chan struct{}) {
+	ticker := time.NewTicker(time.Hour)
+	for {
+		select {
+		case <-ticker.C:
+			e := discord.UpdateListeningStatus("tinju’i toi")
+			if e != nil {
+				fmt.Fprintf(os.Stderr, "%v", e)
+			}
+		case <-quit:
+			ticker.Stop()
+			return
+		}
+	}
+}
+
 func main() {
 	must(loadJVS())
 
@@ -33,12 +50,14 @@ func main() {
 	discord.ShouldReconnectOnError = true
 
 	must(discord.Open())
-	must(discord.UpdateListeningStatus("tinju’i toi"))
 	discord.AddHandler(handleMessage)
+	quitter := make(chan struct{}, 1)
+	updateStatus(discord, quitter)
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
+	quitter <- struct{}{}
 
 	discord.Close()
 }

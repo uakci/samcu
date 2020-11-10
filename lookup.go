@@ -58,66 +58,66 @@ func reverseLookup(respond func(string), _ string, args []string) {
 		respond("need input")
 		return
 	}
-  searched := "glosses"
+	searched := "glosses"
 	matches := map[string]string{}
 	for head, vla := range dict[lang] {
-    for i, gloss := range vla.Glosses {
-      if gloss == a {
-        parts := append(append(append([]string{}, vla.Glosses[:i]...), "**" + gloss + "**"), vla.Glosses[i+1:]...)
-        matches[head] = strings.Join(parts, ", ")
-        break
-      }
-    }
-    if len(matches) > highLimit {
-      break
-    }
-  }
-  if len(matches) == 0 {
-    matches = map[string]string{}
-    searched = "definitions"
-    for head, vla := range dict[lang] {
-      add, ok := tryFind(vla.Definition, "__" + a + "__")
-      if ok {
-        matches[head] = add
-        if len(matches) > highLimit {
-          break
-        }
-      }
-    }
-  }
-  if len(matches) == 0 {
-    matches = map[string]string{}
-    searched = "definitions"
-    for head, vla := range dict[lang] {
-      add, ok := tryFind(vla.Notes, a)
-      if ok {
-        matches[head] = add
-        if len(matches) > highLimit {
-          break
-        }
-      }
+		for i, gloss := range vla.Glosses {
+			if gloss == a {
+				parts := append(append(append([]string{}, vla.Glosses[:i]...), "**"+gloss+"**"), vla.Glosses[i+1:]...)
+				matches[head] = strings.Join(parts, ", ")
+				break
+			}
 		}
-  }
+		if len(matches) > highLimit {
+			break
+		}
+	}
+	if len(matches) == 0 {
+		matches = map[string]string{}
+		searched = "definitions"
+		for head, vla := range dict[lang] {
+			add, ok := tryFind(vla.Definition, "__"+a+"__")
+			if ok {
+				matches[head] = add
+				if len(matches) > highLimit {
+					break
+				}
+			}
+		}
+	}
+	if len(matches) == 0 {
+		matches = map[string]string{}
+		searched = "definitions"
+		for head, vla := range dict[lang] {
+			add, ok := tryFind(vla.Notes, a)
+			if ok {
+				matches[head] = add
+				if len(matches) > highLimit {
+					break
+				}
+			}
+		}
+	}
 	switch {
 	case len(matches) == 0:
 		respond("facki tu’a no da")
 	case len(matches) <= lowLimit:
 		buil := strings.Builder{}
 		i := 0
-    buil.WriteString("**in " + searched + "**")
+		buil.WriteString("**in " + searched + "**")
 		for vla, match := range matches {
-      buil.WriteString("\n")
+			buil.WriteString("\n")
 			buil.WriteString(vla)
 			buil.WriteString(": ")
 			buil.WriteString(match)
 			i++
 		}
-    if len(matches) == 1 {
-      buil.WriteString("\n")
-      for k := range matches {
-        buil.WriteString(formatDef(k, dict[lang][k]))
-      }
-    }
+		if len(matches) == 1 {
+			buil.WriteString("\n")
+			for k := range matches {
+				buil.WriteString(formatDef(k, dict[lang][k]))
+			}
+		}
 		respond(buil.String())
 	case len(matches) <= highLimit:
 		buil := strings.Builder{}
@@ -130,7 +130,7 @@ func reverseLookup(respond func(string), _ string, args []string) {
 			i++
 		}
 		respond(buil.String())
-  default:
+	default:
 		respond("too many hits – try different query")
 	}
 }

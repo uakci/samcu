@@ -1,9 +1,9 @@
 package main
 
 import (
-  jz "github.com/uakci/jvozba/v3"
-  "bytes"
-  "strings"
+	"bytes"
+	jz "github.com/uakci/jvozba/v3"
+	"strings"
 )
 
 func katna(respond func(string), _ string, args []string) {
@@ -12,14 +12,14 @@ func katna(respond func(string), _ string, args []string) {
 		return
 	}
 	arg := h.Replace(args[0])
-  decomp := cutter(arg)
-  for i, a := range decomp {
-    if a == "" {
-      respond("rafsi -" + string(jz.Katna([]byte(arg))[i]) + "- unknown")
-      return
-    }
-  }
-  respond(strings.Join(decomp, " "))
+	decomp := cutter(arg)
+	for i, a := range decomp {
+		if a == "" {
+			respond("rafsi -" + string(jz.Katna([]byte(arg))[i]) + "- unknown")
+			return
+		}
+	}
+	respond(strings.Join(decomp, " "))
 }
 
 func cutter(lujvo string) []string {
@@ -28,18 +28,18 @@ func cutter(lujvo string) []string {
 	for i, raf := range rafpoi {
 		ok := false
 		for selrafsi, rafsiporsi := range jz.Rafsi {
-      if (len(raf) == 4 || len(raf) == 5) && len(selrafsi) == 5 && selrafsi[:4] == string(raf[:4]) {
+			if (len(raf) == 4 || len(raf) == 5) && len(selrafsi) == 5 && selrafsi[:4] == string(raf[:4]) {
 				tanru[i] = selrafsi
-        ok = true
-      } else {
-        for _, rafsi := range rafsiporsi {
-          if rafsi == string(raf) {
-            tanru[i] = selrafsi
-            ok = true
-            break
-          }
-        }
-      }
+				ok = true
+			} else {
+				for _, rafsi := range rafsiporsi {
+					if rafsi == string(raf) {
+						tanru[i] = selrafsi
+						ok = true
+						break
+					}
+				}
+			}
 			if ok {
 				break
 			}
@@ -52,5 +52,5 @@ func cutter(lujvo string) []string {
 			}
 		}
 	}
-  return tanru
+	return tanru
 }
