@@ -18,5 +18,9 @@ github.com/uakci/jvozba/v3 v3.0.0-20201101191223-115871f1b44a h1:VqryqOHKOuchdGb
 github.com/uakci/jvozba/v3 v3.0.0-20201101191223-115871f1b44a/go.mod h1:0frn4LraSFmrwSx23jfNMNFb/5rkGX1tuXZlNlfNuM8=
 github.com/uakci/jvozba/v3 v3.0.0-20201116004913-281876cdc5e7 h1:GsIHsoWbD96wDl0QN1x5bUoZA0KQIWj2FUQArVH5Cpw=
 github.com/uakci/jvozba/v3 v3.0.0-20201116004913-281876cdc5e7/go.mod h1:0frn4LraSFmrwSx23jfNMNFb/5rkGX1tuXZlNlfNuM8=
+github.com/uakci/jvozba/v3 v3.0.0-20201116010212-b530dd85029e h1:oi542y0NnXr2A6iJXpjuRkp59QoM9HDCIVhyIlrjyPQ=
+github.com/uakci/jvozba/v3 v3.0.0-20201116010212-b530dd85029e/go.mod h1:0frn4LraSFmrwSx23jfNMNFb/5rkGX1tuXZlNlfNuM8=
+github.com/uakci/jvozba/v3 v3.0.0-20201116010605-8ece59202d25 h1:eufXiQlE2pTgB4B866C2e7wpNDwJBYcVcXhIhwJVY/8=
+github.com/uakci/jvozba/v3 v3.0.0-20201116010605-8ece59202d25/go.mod h1:0frn4LraSFmrwSx23jfNMNFb/5rkGX1tuXZlNlfNuM8=
 golang.org/x/crypto v0.0.0-20181030102418-4d3f4d9ffa16 h1:y6ce7gCWtnH+m3dCjzQ1PCuwl28DDIc3VNnvY29DlIA=
 golang.org/x/crypto v0.0.0-20181030102418-4d3f4d9ffa16/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
