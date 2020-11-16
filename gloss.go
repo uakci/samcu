@@ -16,7 +16,11 @@ func gloss(respond func(string), _ string, args []string) {
 		if jz.IsGismu([]byte(a)) || jz.IsCmavo([]byte(a)) || len(jz.Katna([]byte(a))) == 1 {
 			subject = []string{a}
 		} else {
-			subject = cutter(a)
+			var e error
+			subject, e = jz.Veljvo(a)
+			if e != nil {
+				subject = []string{a}
+			}
 		}
 		for j, s := range subject {
 			if j > 0 {
