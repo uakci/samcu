@@ -1,24 +1,25 @@
-package main
+package samcu
 
 import (
 	"fmt"
-	jz "github.com/uakci/jvozba/v3"
+	jvozba "github.com/uakci/jvozba/v3"
 	"os"
 	"strings"
 )
 
-func jvozba(respond func(string), _ string, tanru []string) {
+func lujvo(_ string, tanru []string) (resp string) {
 	defer func() {
 		if r := recover(); r != nil {
-			respond("**spaji nabmi** .u’u")
 			fmt.Fprint(os.Stderr, r)
+			resp = "**spaji nabmi** .u’u"
 		}
 	}()
 
-	lujvo, err := jz.Jvozba(strings.Join(tanru, " "), jz.Brivla)
+	jvo, err := jvozba.Jvozba(strings.Join(tanru, " "), jvozba.Brivla)
 	if err != nil {
-		respond("**nabmi**: " + err.Error())
+		resp = fmt.Sprintf("**nabmi**: %s", err.Error())
 	} else {
-		respond(fmt.Sprintf("%s (%d)", lujvo, jz.Score([]byte(lujvo))))
-	}
+    resp = jvo
+  }
+	return
 }

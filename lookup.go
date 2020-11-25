@@ -1,4 +1,4 @@
-package main
+package samcu
 
 import (
 	"fmt"
@@ -11,37 +11,27 @@ const (
 	highLimit = 50
 )
 
-var dict dictionaries
+var dict Dictionaries
 
-type dictionaries map[string]dictionary
+type Dictionaries map[string]Dictionary
 
-type dictionary map[string]definition
+type Dictionary map[string]Definition
 
-type definition struct {
-	Type       string
-	Author     string
-	Definition string
-	Notes      string
-	Glosses    []string
+type Definition struct {
+	Type       string   `json:"type"`
+	Author     string   `json:"author"`
+	Definition string   `json:"definition"`
+	Notes      string   `json:"notes"`
+	Glosses    []string `json:"glosses"`
 }
 
-func formatDef(a string, v definition) string {
+func formatDef(a string, v Definition) string {
 	notes := ""
 	if v.Notes != "" {
 		notes = fmt.Sprintf(" *%s*", v.Notes)
 	}
 	return fmt.Sprintf("**%s** [%s]: %s%s (%s)",
 		a, v.Type, v.Definition, notes, v.Author)
-}
-
-func lookup(respond func(string), _ string, args []string) {
-	a := h.Replace(strings.Join(args, " "))
-	vla, ok := dict[lang][a]
-	if !ok {
-		respond("facki tu’a no da")
-	} else {
-		respond(formatDef(a, vla))
-	}
 }
 
 func tryFind(where, what string) (string, bool) {
@@ -52,15 +42,29 @@ func tryFind(where, what string) (string, bool) {
 	}
 }
 
-func reverseLookup(respond func(string), _ string, args []string) {
-	a := h.Replace(strings.Join(args, " "))
+func sisku(cmd string, args []string) string {
+	a := H.Replace(strings.Join(args, " "))
 	if len(a) == 0 {
-		respond("need input")
-		return
+		return "need input"
 	}
+
+	dic := dict[lang]
+	if len(cmd) > 6 {
+		var ok bool
+		dic, ok = dict[cmd[6:]]
+		if !ok {
+			return "no such dictionary as " + cmd[6:]
+		}
+	}
+
+	vla, ok := dic[a]
+	if ok {
+		return formatDef(a, vla)
+	}
+
 	searched := "glosses"
 	matches := map[string]string{}
-	for head, vla := range dict[lang] {
+	for head, vla := range dic {
 		for i, gloss := range vla.Glosses {
 			if gloss == a {
 				parts := append(append(append([]string{}, vla.Glosses[:i]...), "**"+gloss+"**"), vla.Glosses[i+1:]...)
@@ -72,10 +76,11 @@ func reverseLookup(respond func(string), _ string, args []string) {
 			break
 		}
 	}
+
 	if len(matches) == 0 {
 		matches = map[string]string{}
 		searched = "definitions"
-		for head, vla := range dict[lang] {
+		for head, vla := range dic {
 			add, ok := tryFind(vla.Definition, "__"+a+"__")
 			if ok {
 				matches[head] = add
@@ -85,10 +90,11 @@ func reverseLookup(respond func(string), _ string, args []string) {
 			}
 		}
 	}
+
 	if len(matches) == 0 {
 		matches = map[string]string{}
 		searched = "definitions"
-		for head, vla := range dict[lang] {
+		for head, vla := range dic {
 			add, ok := tryFind(vla.Notes, a)
 			if ok {
 				matches[head] = add
@@ -98,11 +104,12 @@ func reverseLookup(respond func(string), _ string, args []string) {
 			}
 		}
 	}
+
+	buil := strings.Builder{}
 	switch {
 	case len(matches) == 0:
-		respond("facki tu’a no da")
+		return "facki tu’a no da"
 	case len(matches) <= lowLimit:
-		buil := strings.Builder{}
 		i := 0
 		buil.WriteString("**in " + searched + "**")
 		for vla, match := range matches {
@@ -115,10 +122,9 @@ func reverseLookup(respond func(string), _ string, args []string) {
 		if len(matches) == 1 {
 			buil.WriteString("\n")
 			for k := range matches {
-				buil.WriteString(formatDef(k, dict[lang][k]))
+				buil.WriteString(formatDef(k, dic[k]))
 			}
 		}
-		respond(buil.String())
 	case len(matches) <= highLimit:
 		buil := strings.Builder{}
 		i := 0
@@ -129,8 +135,8 @@ func reverseLookup(respond func(string), _ string, args []string) {
 			buil.WriteString(vla)
 			i++
 		}
-		respond(buil.String())
 	default:
-		respond("too many hits – try different query")
+		return "too many hits – try different query"
 	}
+	return buil.String()
 }

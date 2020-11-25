@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	"io/ioutil"
+	"github.com/uakci/samcu"
+	"os"
 	"regexp"
 	"strings"
 )
@@ -46,14 +48,34 @@ type lemma struct {
 	Valsi string `xml:"valsi,attr"`
 }
 
-func loadJVS() error {
-	f, e := ioutil.ReadFile("jbovlaste.xml")
-	must(e)
-	var jvs xmlJbovlaste
-	e = xml.Unmarshal(f, &jvs)
-	must(e)
-	dict = parseJVS(jvs)
-	return nil
+func main() {
+	grand := samcu.Dictionaries{}
+	for _, fname := range os.Args[1:] {
+		f, e := os.Open(fname)
+		if e != nil {
+			panic(e)
+		}
+		var jvs xmlJbovlaste
+		e = xml.NewDecoder(f).Decode(&jvs)
+		if e != nil {
+			panic(e)
+		}
+
+		this := parseJVS(jvs)
+		for k, v := range this {
+			grand[k] = v
+		}
+	}
+	f, e := os.Create("jvs.json")
+	if e != nil {
+		panic(e)
+	}
+	enc := json.NewEncoder(f)
+	enc.SetIndent("", "  ")
+	e = enc.Encode(grand)
+	if e != nil {
+		panic(e)
+	}
 }
 
 var (
@@ -61,7 +83,7 @@ var (
 	specialCharactersRegex = regexp.MustCompile("[\\`*_<>!|]")
 )
 
-func parseDollars(s string) string {
+func parseDollars(s string, embellishItalics bool) string {
 	result := strings.Builder{}
 	result.Grow(len(s))
 	splinters := strings.Split(s, "$")
@@ -110,9 +132,13 @@ func parseDollars(s string) string {
 			}
 		}
 		if succ {
-			result.WriteByte('*')
+			if embellishItalics {
+				result.WriteByte('*')
+			}
 			result.WriteString(buf.String())
-			result.WriteByte('*')
+			if embellishItalics {
+				result.WriteByte('*')
+			}
 		} else {
 			result.WriteByte('`')
 			result.WriteString(splinter)
@@ -122,14 +148,14 @@ func parseDollars(s string) string {
 	return result.String()
 }
 
-func parseJVS(jvs xmlJbovlaste) dictionaries {
-	result := map[string]dictionary{}
+func parseJVS(jvs xmlJbovlaste) samcu.Dictionaries {
+	result := map[string]samcu.Dictionary{}
 	for _, direction := range jvs.Directions {
 		if len(direction.Lemmata) > 0 {
 			continue
 		}
 		key := direction.To
-		dict := map[string]definition{}
+		dict := map[string]samcu.Definition{}
 		for _, valsi := range direction.Valsi {
 			var typ string
 			if valsi.Selmaho != nil {
@@ -151,11 +177,11 @@ func parseJVS(jvs xmlJbovlaste) dictionaries {
 					glosses = append(glosses, g.Word)
 				}
 			}
-			dict[h.Replace(valsi.Word)] = definition{
+			dict[samcu.H.Replace(valsi.Word)] = samcu.Definition{
 				Type:       typ,
 				Author:     valsi.User.UserName,
-				Definition: parseDollars(valsi.Definition),
-				Notes:      parseDollars(notes),
+				Definition: parseDollars(valsi.Definition, true),
+				Notes:      parseDollars(notes, false),
 				Glosses:    glosses,
 			}
 		}

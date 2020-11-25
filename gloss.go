@@ -1,23 +1,23 @@
-package main
+package samcu
 
 import (
-	jz "github.com/uakci/jvozba/v3"
+	jvozba "github.com/uakci/jvozba/v3"
 	"strings"
 )
 
-func gloss(respond func(string), _ string, args []string) {
+func gloss(_ string, args []string) string {
 	result := strings.Builder{}
 	for i, a := range args {
 		if i > 0 {
 			result.WriteRune('\u2003')
 		}
-		a = h.Replace(a)
+		a = H.Replace(a)
 		var subject []string
-		if jz.IsGismu([]byte(a)) || jz.IsCmavo([]byte(a)) || len(jz.Katna([]byte(a))) == 1 {
+		if jvozba.IsGismu([]byte(a)) || jvozba.IsCmavo([]byte(a)) || len(jvozba.Katna([]byte(a))) == 1 {
 			subject = []string{a}
 		} else {
 			var e error
-			subject, e = jz.Veljvo(a)
+			subject, e = jvozba.Veljvo(a)
 			if e != nil {
 				subject = []string{a}
 			}
@@ -34,5 +34,5 @@ func gloss(respond func(string), _ string, args []string) {
 			}
 		}
 	}
-	respond(result.String())
+	return result.String()
 }

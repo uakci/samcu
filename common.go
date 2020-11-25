@@ -1,5 +1,5 @@
-package main
+package samcu
 
 import "strings"
 
-var h = strings.NewReplacer("’", "'", "h", "'", ".", "")
+var H = strings.NewReplacer("’", "'", "h", "'", ".", "")

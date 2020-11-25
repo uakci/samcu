@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/uakci/samcu"
 )
 
 func must(e error) {
@@ -21,6 +22,8 @@ const (
 	myRole      = "772142260128710719"
 	helpChannel = "772167961771245578"
 )
+
+var helpMessage = "<#" + helpChannel + ">"
 
 func updateStatus(discord *discordgo.Session, quit <-chan struct{}) {
 	updaterStatuser(discord)
@@ -44,7 +47,7 @@ func updaterStatuser(discord *discordgo.Session) {
 }
 
 func main() {
-	must(loadJVS())
+	must(samcu.LoadJVS())
 
 	token, ok := os.LookupEnv("SAMCU_TOKEN")
 	if !ok {
@@ -67,16 +70,6 @@ func main() {
 	discord.Close()
 }
 
-var handlers = map[string]func(func(string), string, []string){
-	"lujvo":    jvozba,
-	"rafsi":    rafsi,
-	"selrafsi": rafsi,
-	"valsi":    lookup,
-	"sisku":    reverseLookup,
-	"katna":    katna,
-	"gloss":    gloss,
-}
-
 func min(a, b int) int {
 	if a < b {
 		return a
@@ -95,7 +88,6 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	var respond = func(msg string) {
-		fmt.Println("→", msg)
 		for i := 0; i < len(msg); i += 1918 {
 			_, err := s.ChannelMessageSend(m.Message.ChannelID, msg[i:min(i+1918, len(msg))])
 			if err != nil {
@@ -103,24 +95,11 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 		}
 	}
-	var errmsg = func() {
-		respond("<#" + helpChannel + ">")
-	}
 
-	fields := strings.Fields(stripped)
-	if len(fields) == 0 {
-		errmsg()
-		return
+	response, ok := samcu.Respond(stripped)
+	if ok {
+		respond(response)
+	} else {
+		respond(helpMessage)
 	}
-	cmd := strings.TrimSuffix(fields[0], ":")
-	fields = fields[1:]
-
-	fmt.Println(cmd, fields)
-
-	handler, ok := handlers[cmd]
-	if !ok {
-		errmsg()
-		return
-	}
-	handler(respond, cmd, fields)
 }
