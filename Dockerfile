@@ -1,6 +1,5 @@
 FROM alpine:latest
 RUN apk add go
 COPY . .
-RUN go build ./discord
-ENTRYPOINT ./samcu
-
+RUN cd discord; go build; cd ..
+ENTRYPOINT ./discord/discord
