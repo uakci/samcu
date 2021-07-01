@@ -10,6 +10,7 @@ var handlers = map[string]func(string, []string) string{
 	"sisku": sisku,
 	"katna": katna,
 	"gloss": gloss,
+	"parse": parse,
 
 	"l": lujvo,
 	"r": rafsi,

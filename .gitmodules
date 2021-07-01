@@ -1,0 +1,3 @@
+[submodule "ilmentufa"]
+	path = ilmentufa
+	url = ../../lojban/ilmentufa.git
