@@ -1,3 +1,3 @@
 [submodule "ilmentufa"]
 	path = ilmentufa
-	url = ../../lojban/ilmentufa.git
+	url = https://github.com/lojban/ilmentufa.git

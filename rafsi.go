@@ -2,43 +2,65 @@ package samcu
 
 import (
 	"fmt"
-	jvozba "github.com/uakci/jvozba/v3"
+  "log"
+	"github.com/uakci/jvozba/v3"
+	"github.com/uakci/samcu/common"
 	"strings"
 )
 
-func rafsi(cmd string, args []string) string {
-	if len(args) != 1 {
-		return "one argument expected"
-	}
-	arg := H.Replace(args[0])
-  var bits []string
+var Rafsi = Command{
+  "rafsi", rafsi,
+	"tutci je srana be lo si'o rafsi",
+  []CommandOption{
+    {"fiha", "do xa'o djuno fi lo'e rafsi ji se rafsi",
+    [][2]string{
+      {"fa", "do cusku lo rafsi i mi cusku lo se rafsi"},
+      {"fe", "do cusku lo se rafsi i mi cusku lo rafsi"},
+    }, StringType},
+		{"zo", "valsi je poi'i do xa'o djuno", nil, StringType},
+  },
+  []CommandOption{},
+}
 
-	if r, ok := jvozba.Rafsi[arg]; ok {
-		bits = append(bits, fmt.Sprintf("%s → {%s}", arg, strings.Join(r, ", ")))
-	}
+func rafsi(args map[string]any) (string, error) {
+  fiha := args["fiha"].(string)
+  ma := args["zo"].(string)
+	ma = common.ReplaceH(ma)
 
-	var (selrafsi string; selselrafsi []string)
-	for sr, rafsiporsi := range jvozba.Rafsi {
-		for _, rafsi := range rafsiporsi {
-			if rafsi == arg {
-				selrafsi = sr
-        selselrafsi = rafsiporsi
-				break
+	switch fiha {
+	case "fe":
+		builder := strings.Builder{}
+		if r, ok := jvozba.Rafsi[ma]; ok {
+			for i, rafsi := range r {
+				if i != 0 {
+					builder.WriteString(" je ")
+				}
+				fmt.Fprintf(&builder, "ra'oi **%s**", rafsi)
 			}
+		} else {
+			builder.WriteString("no da")
+		}
+		fmt.Fprintf(&builder, " rafsi zo %s", ma)
+		return builder.String(), nil
+
+	case "fa":
+		var selrafsi *string
+		for sr, rafsiporsi := range jvozba.Rafsi {
+			for _, rafsi := range rafsiporsi {
+				if rafsi == ma {
+					selrafsi = &sr
+					break
+				}
+			}
+		}
+
+		if selrafsi != nil {
+			return fmt.Sprintf("zo **%s** se rafsi ra'oi %s", *selrafsi, ma), nil
+		} else {
+			return fmt.Sprintf("no da se rafsi ra'oi %s", ma), nil
 		}
 	}
 
-	if len(selselrafsi) > 0 {
-		bits = append(bits, fmt.Sprintf("%s → {%s}", selrafsi, strings.Join(selselrafsi, ", ")))
-	}
-
-  if len(bits) > 0 {
-    if len(bits) == 2 && bits[0] == bits[1] {
-      return bits[0]
-    } else {
-      return strings.Join(bits, "; ")
-    }
-  } else {
-    return "∅"
-  }
+  log.Panicf("unknown fiha %s", fiha)
+  return "", nil
 }

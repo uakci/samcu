@@ -16,7 +16,7 @@ func must(e error) {
 }
 
 func main() {
-	must(samcu.LoadJVS())
+	samcu.Init()
 
 	if len(os.Args) < 2 {
 		scanner := bufio.NewScanner(os.Stdin)

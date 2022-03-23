@@ -1,14 +1,29 @@
-package main
+package jvs
 
 import (
-	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	"github.com/uakci/samcu"
-	"os"
+	"github.com/uakci/samcu/common"
+	"io"
 	"regexp"
 	"strings"
+	"sync"
 )
+
+type IndexType struct {
+	Mutex *sync.RWMutex
+	Index Dictionaries
+}
+type Dictionaries map[string]Dictionary
+type Dictionary map[string]Definition
+
+type Definition struct {
+	Type       string   `json:"type"`
+	Author     string   `json:"author"`
+	Definition string   `json:"definition"`
+	Notes      string   `json:"notes"`
+	Glosses    []string `json:"glosses"`
+}
 
 type xmlJbovlaste struct {
 	Directions []direction `xml:"direction"`
@@ -48,34 +63,14 @@ type lemma struct {
 	Valsi string `xml:"valsi,attr"`
 }
 
-func main() {
-	grand := samcu.Dictionaries{}
-	for _, fname := range os.Args[1:] {
-		f, e := os.Open(fname)
-		if e != nil {
-			panic(e)
-		}
-		var jvs xmlJbovlaste
-		e = xml.NewDecoder(f).Decode(&jvs)
-		if e != nil {
-			panic(e)
-		}
+func Parse(reader io.Reader) (Dictionary, error) {
+	var jvs xmlJbovlaste
+	e := xml.NewDecoder(reader).Decode(&jvs)
+	if e != nil {
+		return nil, e
+	}
 
-		this := parseJVS(jvs)
-		for k, v := range this {
-			grand[k] = v
-		}
-	}
-	f, e := os.Create("jvs.json")
-	if e != nil {
-		panic(e)
-	}
-	enc := json.NewEncoder(f)
-	enc.SetIndent("", "  ")
-	e = enc.Encode(grand)
-	if e != nil {
-		panic(e)
-	}
+	return parseJVS(jvs), nil
 }
 
 var (
@@ -148,14 +143,12 @@ func parseDollars(s string, embellishItalics bool) string {
 	return result.String()
 }
 
-func parseJVS(jvs xmlJbovlaste) samcu.Dictionaries {
-	result := map[string]samcu.Dictionary{}
+func parseJVS(jvs xmlJbovlaste) (result Dictionary) {
 	for _, direction := range jvs.Directions {
 		if len(direction.Lemmata) > 0 {
 			continue
 		}
-		key := direction.To
-		dict := map[string]samcu.Definition{}
+		result = map[string]Definition{}
 		for _, valsi := range direction.Valsi {
 			var typ string
 			if valsi.Selmaho != nil {
@@ -177,7 +170,7 @@ func parseJVS(jvs xmlJbovlaste) samcu.Dictionaries {
 					glosses = append(glosses, g.Word)
 				}
 			}
-			dict[samcu.H.Replace(valsi.Word)] = samcu.Definition{
+			result[common.ReplaceH(valsi.Word)] = Definition{
 				Type:       typ,
 				Author:     valsi.User.UserName,
 				Definition: parseDollars(valsi.Definition, true),
@@ -185,7 +178,6 @@ func parseJVS(jvs xmlJbovlaste) samcu.Dictionaries {
 				Glosses:    glosses,
 			}
 		}
-		result[key] = dict
 	}
-	return result
+	return
 }

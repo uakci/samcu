@@ -1,8 +1,4 @@
-/samcu
-/discord/discord
-/cli/cli
+/.env
+/cli
+/discord
 /*.xml
-/jvs.json
-/jvs/jvs
-/jvs/*.xml
-/jvs/jvs.json

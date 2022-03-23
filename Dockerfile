@@ -1,6 +1,11 @@
-FROM alpine:latest
-RUN apk add go nodejs
-WORKDIR /go/src/github.com/uakci/jvozba
+FROM alpine:latest AS build
+RUN apk add --no-cache go nodejs
+WORKDIR /go/src/github.com/uakci/samcu
+COPY go.mod go.sum ./
+RUN go mod download all
 COPY . .
-RUN cd discord && go build . && cd ..
-ENTRYPOINT ./discord/discord
+RUN go build -ldflags "-linkmode external -extldflags -static -s -w" ./cmd/discord
+
+FROM alpine
+COPY --from=build /go/src/github.com/uakci/samcu/discord /discord
+ENTRYPOINT /discord

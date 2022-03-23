@@ -2,30 +2,40 @@ package samcu
 
 import (
 	"fmt"
+	"github.com/uakci/samcu/jvs"
+  "github.com/uakci/samcu/common"
 	"strings"
+	"sync"
 )
 
-const (
-	lang      = "English"
-	lowLimit  = 10
-	highLimit = 50
-)
-
-var dict Dictionaries
-
-type Dictionaries map[string]Dictionary
-
-type Dictionary map[string]Definition
-
-type Definition struct {
-	Type       string   `json:"type"`
-	Author     string   `json:"author"`
-	Definition string   `json:"definition"`
-	Notes      string   `json:"notes"`
-	Glosses    []string `json:"glosses"`
+var Sisku = Command{
+  "sisku", sisku,
+  "sisku fi tu'a lo'e vlaste",
+  []CommandOption{
+		{"selsisku", "valsi je cu poi'i do djica lo ka facki fi ke'a", nil, StringType},
+  },
+  []CommandOption{BanguOpt},
 }
 
-func formatDef(a string, v Definition) string {
+const (
+	lowLimit  = 10
+	highLimit = 75
+)
+
+var Index jvs.IndexType = jvs.IndexType{&sync.RWMutex{}, jvs.Dictionaries{}}
+
+func GetDict(name string) (jvs.Dictionary, error) {
+	Index.Mutex.RLock()
+	defer Index.Mutex.RUnlock()
+	d, o := Index.Index[name]
+	if o {
+		return d, nil
+	} else {
+		return nil, fmt.Errorf("fliba lo ka facki moi'a lo me zo'oi %s vlacku", name)
+	}
+}
+
+func formatDef(a string, v jvs.Definition) string {
 	notes := ""
 	if v.Notes != "" {
 		notes = fmt.Sprintf(" *%s*", v.Notes)
@@ -42,32 +52,29 @@ func tryFind(where, what string) (string, bool) {
 	}
 }
 
-func sisku(cmd string, args []string) string {
-	a := H.Replace(strings.Join(args, " "))
-	if len(a) == 0 {
-		return "need input"
+func sisku(args map[string]any) (string, error) {
+  selsisku := args["selsisku"].(string)
+  bangu := GetBangu(args)
+	dic, err := GetDict(bangu)
+	if err != nil {
+		return "", err
 	}
 
-	dic := dict[lang]
-	if len(cmd) > 6 {
-		var ok bool
-		dic, ok = dict[cmd[6:]]
-		if !ok {
-			return "no such dictionary as " + cmd[6:]
-		}
-	}
-
+	a := common.ReplaceH(selsisku)
 	vla, ok := dic[a]
 	if ok {
-		return formatDef(a, vla)
+		return formatDef(a, vla), nil
 	}
 
-	searched := "glosses"
+	searched := "tordu velski"
 	matches := map[string]string{}
 	for head, vla := range dic {
 		for i, gloss := range vla.Glosses {
 			if gloss == a {
-				parts := append(append(append([]string{}, vla.Glosses[:i]...), "**"+gloss+"**"), vla.Glosses[i+1:]...)
+        parts := make([]string, 0, 3)
+				parts = append(parts, vla.Glosses[:i]...)
+        parts = append(parts, "**"+gloss+"**")
+        parts = append(parts, vla.Glosses[i+1:]...)
 				matches[head] = strings.Join(parts, ", ")
 				break
 			}
@@ -79,7 +86,7 @@ func sisku(cmd string, args []string) string {
 
 	if len(matches) == 0 {
 		matches = map[string]string{}
-		searched = "definitions"
+		searched = "clani velski"
 		for head, vla := range dic {
 			add, ok := tryFind(vla.Definition, "__"+a+"__")
 			if ok {
@@ -93,7 +100,7 @@ func sisku(cmd string, args []string) string {
 
 	if len(matches) == 0 {
 		matches = map[string]string{}
-		searched = "definitions"
+		searched = "clani velski"
 		for head, vla := range dic {
 			add, ok := tryFind(vla.Notes, a)
 			if ok {
@@ -108,10 +115,10 @@ func sisku(cmd string, args []string) string {
 	buil := strings.Builder{}
 	switch {
 	case len(matches) == 0:
-		return "facki tu’a no da"
+		return "", fmt.Errorf("facki tu'a no da")
 	case len(matches) <= lowLimit:
 		i := 0
-		buil.WriteString("**in " + searched + "**")
+		buil.WriteString("**sisku fi lo'e " + searched + "**")
 		for vla, match := range matches {
 			buil.WriteString("\n")
 			buil.WriteString(vla)
@@ -136,7 +143,7 @@ func sisku(cmd string, args []string) string {
 			i++
 		}
 	default:
-		return "too many hits – try different query"
+		return "", fmt.Errorf("du'e da mapti lo jai se sisku pe do i ko troci lo ka cpedu su'o drata")
 	}
-	return buil.String()
+	return buil.String(), nil
 }
