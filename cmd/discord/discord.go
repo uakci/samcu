@@ -69,10 +69,15 @@ func main() {
 
 func handleMessage(s *discordgo.Session, e *discordgo.MessageCreate) {
 	args := strings.Fields(e.Message.Content)
-	if len(args) == 0 || !strings.HasPrefix(args[0], "-") {
+	if len(args) == 0 || e.Message.Author.ID == s.State.User.ID {
 		return
+	} else if !strings.HasPrefix(args[0], "-") {
+		if e.Message.GuildID != "" || e.Message.Thread != nil {
+			return
+		}
+	} else {
+		args[0] = args[0][1:]
 	}
-	args[0] = args[0][1:]
 	ok, msg, err := samcu.Respond(args)
 
 	var resp string
@@ -85,5 +90,21 @@ func handleMessage(s *discordgo.Session, e *discordgo.MessageCreate) {
 		resp = msg
 	}
 
-	s.ChannelMessageSend(e.Message.ChannelID, resp)
+	chunks := []string{}
+	var current strings.Builder
+	current.Grow(2000)
+	for _, word := range strings.SplitAfter(resp, " ") {
+		if current.Len()+len([]byte(word)) > 2000 {
+			chunks = append(chunks, current.String())
+			current.Reset()
+		}
+		current.WriteString(word)
+	}
+	if current.Len() > 0 {
+		chunks = append(chunks, current.String())
+	}
+
+	for _, chunk := range chunks {
+		s.ChannelMessageSend(e.Message.ChannelID, chunk)
+	}
 }
