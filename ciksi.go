@@ -1,34 +1,27 @@
 package samcu
 
 import (
-	"github.com/uakci/jvozba/v3"
-  "github.com/uakci/samcu/common"
 	"strings"
+
+	"github.com/uakci/jvozba/v3"
+	"github.com/uakci/samcu/common"
+	"github.com/uakci/samcu/jvs"
 )
 
-var Ciksi = Command{
-  "ciksi", ciksi,
-  "ciksi lo jufra fo tu'a su'o na lojbo",
-  []CommandOption{
-    {"jufra", "poi'i do djica lo nu mi ciksi ke'a", nil, StringType},
-  },
-  []CommandOption{BanguOpt},
+func ciksi(dict jvs.Dictionary) Handler {
+	return NoEmpty(func(args []string) (string, error) {
+		return ciksi_(dict, args)
+	})
 }
 
-func ciksi(args map[string]any) (string, error) {
-  jufra := args["jufra"].(string)
-  bangu := GetBangu(args)
-  dict, err := GetDict(bangu)
-	if err != nil {
-		return "", err
-	}
-
-	result := strings.Builder{}
-	for i, a := range strings.Fields(jufra) {
+func ciksi_(dict jvs.Dictionary, args []string) (string, error) {
+	var result strings.Builder
+	for i, a := range args {
 		if i > 0 {
 			result.WriteRune('\u2003')
 		}
 		a = common.ReplaceH(a)
+
 		var subject []string
 		if jvozba.IsGismu([]byte(a)) || jvozba.IsCmavo([]byte(a)) || len(jvozba.Katna([]byte(a))) == 1 {
 			subject = []string{a}
@@ -39,6 +32,7 @@ func ciksi(args map[string]any) (string, error) {
 				subject = []string{a}
 			}
 		}
+
 		for j, s := range subject {
 			if j > 0 {
 				result.WriteRune('—')

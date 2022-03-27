@@ -15,29 +15,37 @@ func must(e error) {
 	}
 }
 
+func comment(ok bool, msg string, err error, invocation []string) {
+	if !ok {
+		fmt.Printf("la'oi %s na slabu mi\n", invocation[0])
+	} else if err != nil {
+		fmt.Printf("la'e di'e cfila: %s\n", err.Error())
+	} else {
+		fmt.Println(msg)
+	}
+}
+
 func main() {
 	samcu.Init()
 
 	if len(os.Args) < 2 {
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
-			in := scanner.Text()
+			in := strings.Fields(scanner.Text())
 			if len(in) == 0 {
 				break
 			}
-			response, ok := samcu.Respond(in)
-			if !ok {
-				fmt.Printf("unknown command %s\n", strings.SplitN(in, " ", 1)[0])
-			} else {
-				fmt.Println(response)
-			}
+			ok, msg, err := samcu.Respond(in)
+			comment(ok, msg, err, in)
 		}
 	} else {
-		response, ok := samcu.Respond(strings.Join(os.Args[1:], " "))
-		if !ok {
-			fmt.Printf("unknown command %s\n", os.Args[1])
+		ok, msg, err := samcu.Respond(os.Args[1:])
+		comment(ok, msg, err, os.Args[1:])
+		switch {
+		case !ok:
+			os.Exit(2)
+		case err != nil:
 			os.Exit(1)
 		}
-		fmt.Println(response)
 	}
 }

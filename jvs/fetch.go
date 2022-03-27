@@ -38,7 +38,7 @@ func FetchAll(cookieLine string, out IndexType, ok chan<- struct{}) error {
 		keys = append(keys, string(v[1]))
 	}
 
-  close(ok)
+	close(ok)
 
 	var (
 		wg  = sync.WaitGroup{}
@@ -46,8 +46,8 @@ func FetchAll(cookieLine string, out IndexType, ok chan<- struct{}) error {
 		sem = semaphore.NewWeighted(int64(runtime.GOMAXPROCS(0)))
 		ctx = context.Background()
 
-    mut = sync.Mutex{}
-    tot = 0
+		mut = sync.Mutex{}
+		tot = 0
 	)
 
 	for _, k := range keys {
@@ -89,22 +89,22 @@ func FetchAll(cookieLine string, out IndexType, ok chan<- struct{}) error {
 
 			out.Mutex.Lock()
 			out.Index[k] = dic
-      l := len(out.Index[k])
-      if l > 0 {
-        log.Printf("success on dic %s – %d entries loaded", k, l)
-      }
-      out.Mutex.Unlock()
+			l := len(out.Index[k])
+			if l > 0 {
+				log.Printf("success on dic %s – %d entries loaded", k, l)
+			}
+			out.Mutex.Unlock()
 
-      mut.Lock()
-      defer mut.Unlock()
-      tot += l
+			mut.Lock()
+			defer mut.Unlock()
+			tot += l
 		}()
 	}
 
-  go func(){
-    wg.Wait()
-    log.Printf("loaded %d dictionaries with %d entries total", len(out.Index), tot)
-  }()
+	go func() {
+		wg.Wait()
+		log.Printf("loaded %d dictionaries with %d entries total", len(out.Index), tot)
+	}()
 
 	return nil
 }

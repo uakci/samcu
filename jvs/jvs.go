@@ -3,11 +3,12 @@ package jvs
 import (
 	"encoding/xml"
 	"fmt"
-	"github.com/uakci/samcu/common"
 	"io"
 	"regexp"
 	"strings"
 	"sync"
+
+	"github.com/uakci/samcu/common"
 )
 
 type IndexType struct {

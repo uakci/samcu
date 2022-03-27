@@ -2,27 +2,21 @@ package samcu
 
 import (
 	"fmt"
-	"github.com/uakci/samcu/jvs"
-  "github.com/uakci/samcu/common"
 	"strings"
 	"sync"
-)
 
-var Sisku = Command{
-  "sisku", sisku,
-  "sisku fi tu'a lo'e vlaste",
-  []CommandOption{
-		{"selsisku", "valsi je cu poi'i do djica lo ka facki fi ke'a", nil, StringType},
-  },
-  []CommandOption{BanguOpt},
-}
+	"github.com/uakci/samcu/common"
+	"github.com/uakci/samcu/jvs"
+)
 
 const (
-	lowLimit  = 10
-	highLimit = 75
+	inliningLimit = 10
 )
 
-var Index jvs.IndexType = jvs.IndexType{&sync.RWMutex{}, jvs.Dictionaries{}}
+var Index jvs.IndexType = jvs.IndexType{
+	Mutex: &sync.RWMutex{},
+	Index: jvs.Dictionaries{},
+}
 
 func GetDict(name string) (jvs.Dictionary, error) {
 	Index.Mutex.RLock()
@@ -52,98 +46,66 @@ func tryFind(where, what string) (string, bool) {
 	}
 }
 
-func sisku(args map[string]any) (string, error) {
-  selsisku := args["selsisku"].(string)
-  bangu := GetBangu(args)
-	dic, err := GetDict(bangu)
-	if err != nil {
-		return "", err
+func sisku(dict jvs.Dictionary) Handler {
+	return NoEmpty(func(args []string) (string, error) {
+		return sisku_(dict, common.ReplaceH(strings.Join(args, " ")))
+	})
+}
+
+func sisku_(dict jvs.Dictionary, term string) (string, error) {
+	if vla, ok := dict[term]; ok {
+		return formatDef(term, vla), nil
 	}
 
-	a := common.ReplaceH(selsisku)
-	vla, ok := dic[a]
-	if ok {
-		return formatDef(a, vla), nil
-	}
-
-	searched := "tordu velski"
 	matches := map[string]string{}
-	for head, vla := range dic {
+	for head, vla := range dict {
 		for i, gloss := range vla.Glosses {
-			if gloss == a {
-        parts := make([]string, 0, 3)
+			if gloss == term {
+				parts := make([]string, 0, 3)
 				parts = append(parts, vla.Glosses[:i]...)
-        parts = append(parts, "**"+gloss+"**")
-        parts = append(parts, vla.Glosses[i+1:]...)
+				parts = append(parts, fmt.Sprintf("**%s**", gloss))
+				parts = append(parts, vla.Glosses[i+1:]...)
 				matches[head] = strings.Join(parts, ", ")
 				break
 			}
 		}
-		if len(matches) > highLimit {
-			break
-		}
 	}
 
 	if len(matches) == 0 {
-		matches = map[string]string{}
-		searched = "clani velski"
-		for head, vla := range dic {
-			add, ok := tryFind(vla.Definition, "__"+a+"__")
-			if ok {
+		for head, vla := range dict {
+			if add, ok := tryFind(vla.Notes, fmt.Sprintf("__%s__", term)); ok {
 				matches[head] = add
-				if len(matches) > highLimit {
-					break
-				}
 			}
 		}
 	}
 
 	if len(matches) == 0 {
-		matches = map[string]string{}
-		searched = "clani velski"
-		for head, vla := range dic {
-			add, ok := tryFind(vla.Notes, a)
-			if ok {
+		for head, vla := range dict {
+			if add, ok := tryFind(vla.Definition, term); ok {
 				matches[head] = add
-				if len(matches) > highLimit {
-					break
-				}
+			} else if add, ok = tryFind(vla.Notes, term); ok {
+				matches[head] = add
 			}
 		}
 	}
 
-	buil := strings.Builder{}
 	switch {
 	case len(matches) == 0:
 		return "", fmt.Errorf("facki tu'a no da")
-	case len(matches) <= lowLimit:
-		i := 0
-		buil.WriteString("**sisku fi lo'e " + searched + "**")
+
+	case len(matches) <= inliningLimit:
+		var builder strings.Builder
 		for vla, match := range matches {
-			buil.WriteString("\n")
-			buil.WriteString(vla)
-			buil.WriteString(": ")
-			buil.WriteString(match)
-			i++
+			fmt.Fprintf(&builder, "%s: %s\n", vla, match)
+			fmt.Fprintln(&builder, formatDef(vla, dict[vla]))
 		}
-		if len(matches) == 1 {
-			buil.WriteString("\n")
-			for k := range matches {
-				buil.WriteString(formatDef(k, dic[k]))
-			}
-		}
-	case len(matches) <= highLimit:
-		buil := strings.Builder{}
-		i := 0
-		for vla := range matches {
-			if i > 0 {
-				buil.WriteString(", ")
-			}
-			buil.WriteString(vla)
-			i++
-		}
+		return builder.String(), nil
+
 	default:
-		return "", fmt.Errorf("du'e da mapti lo jai se sisku pe do i ko troci lo ka cpedu su'o drata")
+		headwords := make([]string, 0, len(matches))
+		for vla := range matches {
+			headwords = append(headwords, vla)
+		}
+		return strings.Join(headwords, ", "), nil
 	}
-	return buil.String(), nil
 }
