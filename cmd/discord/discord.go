@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"regexp"
 	"strings"
 	"syscall"
 	"time"
@@ -12,6 +13,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/uakci/samcu"
 )
+
+var cmdRegexp = regexp.MustCompile(`^-([a-z]+)$`)
 
 func must(e error) {
 	if e != nil {
@@ -59,7 +62,7 @@ func main() {
 	go updateStatus(discord, quitter)
 
 	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
 	quitter <- struct{}{}
 
@@ -76,7 +79,11 @@ func handleMessage(s *discordgo.Session, e *discordgo.MessageCreate) {
 			return
 		}
 	} else {
-		args[0] = args[0][1:]
+		cmdMatch := cmdRegexp.FindStringSubmatch(args[0])
+		if cmdMatch == nil {
+			return
+		}
+		args[0] = cmdMatch[1]
 	}
 	ok, msg, err := samcu.Respond(args)
 
