@@ -15,11 +15,11 @@ import (
 
 const (
 	listingEndpoint = "https://jbovlaste.lojban.org/export/xml.html"
-	exportEndpoint  = "https://jbovlaste.lojban.org/export/xml-export.html"
+	exportEndpoint  = "https://jbovlaste.lojban.org/export/xml-export.html?lang=%s&positive_scores_only=0"
 )
 
 var (
-	langRegexp = regexp.MustCompile(`<a href="xml-export\.html\?lang=([a-z]+)\">.*?</a>`)
+	langRegexp = regexp.MustCompile(`<option value="([a-z-]+)">.*?</option>`)
 )
 
 func FetchAll(cookieLine string, out IndexType, ok chan<- struct{}) error {
@@ -61,7 +61,7 @@ func FetchAll(cookieLine string, out IndexType, ok chan<- struct{}) error {
 				wg.Done()
 				sem.Release(1)
 			}()
-			req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s?lang=%s", exportEndpoint, k), nil)
+			req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf(exportEndpoint, k), nil)
 			if err != nil {
 				log.Print(err)
 				return
