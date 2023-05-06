@@ -19,7 +19,7 @@ const (
 )
 
 var (
-	langRegexp = regexp.MustCompile(`<option value="([a-z-]+)">.*?</option>`)
+	langRegexp = regexp.MustCompile(`<option(?: selected)? value="([a-z-]+)">.*?</option>`)
 )
 
 func FetchAll(cookieLine string, out IndexType, ok chan<- struct{}) error {
